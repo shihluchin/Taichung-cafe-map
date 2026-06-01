@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+
+        <tilte>台中跑咖地圖</tilte>
+
+        <link
+
+        rel="stylesheet"
+
+        href="https://unpkg.com/leaflet/dist/leaflet.css"
+
+        />
+        
+        <style>
+            body{
+                font-family: Arial,sans-serif;
+                text-align: center;
+                background-color:#A98B73;
+                padding: 50px;
+            }
+            h1{
+                color:#333;
+                padding-top: 20px;
+            }
+
+            button{
+                   min-width: 120px;
+                   height: 40px;
+                   padding:10px;
+                   border:none;
+                   border-radius:10px;
+                   background: white;
+                   cursor:pointer;
+                   font-size: 16px;
+                   margin-top: 10px;
+                   transition: 0.3s;
+            }
+
+            .active{
+                   background:green;
+                   color: white;
+            }
+
+            #map{
+                 width:80%;
+                 height:600px;
+                 margin:30px auto;
+                 border-radius:20px;
+                 overflow:hidden;
+                 box-shadow:0 0 10px rgba(0,0,0,0.2);
+            }
+            </style>
+            </head>
+
+            <body>
+                <h1>你好，我喝一點☕</h1>
+
+                <div class ="filters">
+
+                <button id = "openBtn" onclick="toggleFilter('open')">
+                現在營業中 
+                </button>
+
+                <button id = "wifiBtn" onclick="toggleFilter('wifi')">
+                網路 
+                </button>
+
+                <button id = "socketBtn" onclick="toggleFilter('socket')">
+                插座 
+                </button>
+
+                <button id = "limitedTimeBtn" onclick="toggleFilter('limitedTime')">
+                不限時 
+                </button>
+
+                </div>
+
+                <div id ="map"></div>
+
+                <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+                <script>
+
+                const map = L.map('map').setView([24.1477, 120.6736], 13);
+
+                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+                 attribution: '© OpenStreetMap'
+
+                }).addTo(map);
+
+
+                const cafes = [
+                    {
+                        name:"Coffee Stopover Black",
+                        wifi:true,
+                        socket:true,
+                        limitedTime:false, 
+                        lat: 24.1457119,
+                        lng: 120.67195502,
+                        info: "世界百大咖啡館",
+                        hours: {
+                            mon:"休息中",
+                            tue:"14:00-19:00",
+                            wed:"14:00-19:00",
+                            thu:"14:00-19:00",
+                            fri:"14:00-19:00",
+                            sat:"14:00-19:00",
+                            sun:"休息中"
+                        },
+                        url: "https://www.coffeestopover.com/",
+                        
+                    },
+
+                    {
+                        name:"Spirited Bakery",
+                        wifi:false,
+                        socket:false,
+                        limitedTime:true, 
+                        lat: 24.13934,
+                        lng: 120.66253,
+                        info: "美式軟餅乾",
+                        hours: {
+                            mon:"12:00-20:00",
+                            tue:"休息中",
+                            wed:"休息中",
+                            thu:"12:00-20:00",
+                            fri:"12:00-20:00",
+                            sat:"12:00-20:00",
+                            sun:"12:00-20:00"
+                        },
+                        url: "https://www.instagram.com/spiritedbakery/",
+                        
+                    },
+
+                    {
+                        name:"Phase Coffee Roasters",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:true, 
+                        lat: 24.13986,
+                        lng: 120.68079,
+                        info: "推薦法式吐司",
+                        hours: {
+                            mon:"9:00-19:00",
+                            tue:"9:00-19:00",
+                            wed:"9:00-19:00",
+                            thu:"9:00-19:00",
+                            fri:"9:00-19:00",
+                            sat:"9:00-19:00",
+                            sun:"9:00-19:00"
+                        },
+                        url: "https://phasecoffeeroasters.com/",
+                        
+                    },
+
+                    {
+                     name:"噓。咖啡",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.15221,
+                        lng: 120.66286,
+                        info: "水母咖啡廳",
+                        hours: {
+                            mon:"12:00-1:00",
+                            tue:"12:00-1:00",
+                            wed:"12:00-1:00",
+                            thu:"12:00-1:00",
+                            fri:"12:00-2:00",
+                            sat:"12:00-2:00",
+                            sun:"12:00-1:00"
+                        },
+                        url: "https://www.instagram.com/shhhhh.cafe_n_bar",
+                    },
+
+                    {
+                        name:"ORIG BLACK",
+                        wifi:true,
+                        socket:true,
+                        limitedTime:false, 
+                        lat: 24.17315,
+                        lng: 120.70227,
+                        info: "黑色系咖啡廳",
+                        hours: {
+                            mon:"11:00-18:30",
+                            tue:"11:00-18:30",
+                            wed:"11:00-18:30",
+                            thu:"11:00-18:30",
+                            fri:"9:00-20:00",
+                            sat:"9:00-20:00",
+                            sun:"9:00-20:00"
+                        },
+                        url: "https://origblack.com/",
+                    },
+
+                    {
+                        name:"Tamp Temper Taichung Coffee",
+                        wifi:false,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.14670,
+                        lng: 120.67017,
+                        info: "多種咖啡豆自選",
+                        hours: {
+                            mon:"9:00-17:30",
+                            tue:"9:00-17:30",
+                            wed:"9:00-17:30",
+                            thu:"9:00-17:30",
+                            fri:"9:00-17:30",
+                            sat:"9:30-16:00",
+                            sun:"休息中"
+                        },
+                        url: "https://www.instagram.com/tamptempercoffee/",
+                    },
+
+                    {
+                        name:"知汐咖啡 Tidal cafe",
+                        wifi:false,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.16892,
+                        lng: 120.66196,
+                        info: "室外座位設有沙發",
+                        hours: {
+                            mon:"11:30-18:00",
+                            tue:"11:30-18:00",
+                            wed:"11:30-18:00",
+                            thu:"11:30-18:00",
+                            fri:"11:30-18:00",
+                            sat:"11:30-18:00",
+                            sun:"11:30-18:00"
+                        },
+                        url: "https://www.instagram.com/tidal.cafe/",
+                    },
+
+                    {
+                        name:"巴倫司康 Baron Scones",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:true, 
+                        lat: 24.14798,
+                        lng: 120.66883,
+                        info: "嘉義知名司康台中分店",
+                        hours: {
+                            mon:"11:00-19:00",
+                            tue:"11:00-19:00",
+                            wed:"11:00-19:00",
+                            thu:"11:00-19:00",
+                            fri:"11:00-19:00",
+                            sat:"11:00-19:00",
+                            sun:"11:00-19:00"
+                        },
+                        url: "https://www.instagram.com/baronscones.tc/",
+                    },
+
+                    {
+                        name:"多美咖啡",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:true, 
+                        lat: 24.15580,
+                        lng: 120.65555,
+                        info: "無菜單咖啡專賣",
+                        hours: {
+                            mon:"13:00-20:00",
+                            tue:"13:00-20:00",
+                            wed:"休息中",
+                            thu:"13:00-20:00",
+                            fri:"13:00-20:00",
+                            sat:"13:00-20:00",
+                            sun:"13:00-20:00"
+                        },
+                        url: "https://www.instagram.com/domanycafe/",
+                    },
+
+                    {
+                        name:"CuppaVV Cafe",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.15720,
+                        lng: 120.66194,
+                        info: "早午餐&甜點",
+                        hours: {
+                            mon:"9:30-18:00",
+                            tue:"9:30-18:00",
+                            wed:"9:30-18:00",
+                            thu:"9:30-18:00",
+                            fri:"9:30-18:00",
+                            sat:"9:30-18:00",
+                            sun:"9:30-18:00"
+                        },
+                        url: "https://www.facebook.com/p/Cuppa-VV-Cafe-100063919548114/?locale=zh_TW",
+                    },
+
+                    {
+                        name:"西成咖啡工作室",
+                        wifi:false,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.14608,
+                        lng: 120.65216,
+                        info: "日式風格咖啡店",
+                        hours: {
+                            mon:"12:00-20:00",
+                            tue:"休息中",
+                            wed:"12:00-20:00",
+                            thu:"12:00-19:30",
+                            fri:"12:00-22:00",
+                            sat:"12:00-22:00",
+                            sun:"12:00-22:00"
+                        },
+                        url: "https://www.instagram.com/nishinari0109/",
+                    },
+
+                    {
+                        name:"洪烘哄咖啡店Hong/me/mie",
+                        wifi:true,
+                        socket:true,
+                        limitedTime:false, 
+                        lat: 24.14235,
+                        lng: 120.65614,
+                        info: "吉娃娃店狗",
+                        hours: {
+                            mon:"11:00-19:00",
+                            tue:"休息中",
+                            wed:"11:00-19:00",
+                            thu:"11:00-19:00",
+                            fri:"11:00-19:00",
+                            sat:"11:00-19:00",
+                            sun:"11:00-19:00"
+                        },
+                        url: "https://www.instagram.com/hong_me_mie_coffee/",
+                    },
+
+                    {
+                        name:"陸丘喫茶室",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:true, 
+                        lat: 24.13841,
+                        lng: 120.65587,
+                        info: "日式甜甜圈專賣",
+                        hours: {
+                            mon:"12:30-18:30",
+                            tue:"12:30-18:30",
+                            wed:"休息中",
+                            thu:"休息中",
+                            fri:"12:30-18:30",
+                            sat:"12:30-18:30",
+                            sun:"12:30-18:30"
+                        },
+                        url: "https://www.instagram.com/cho_kissa/",
+                    },
+
+                    {
+                        name:"Celaffee Cafe",
+                        wifi:true,
+                        socket:true,
+                        limitedTime:false, 
+                        lat: 24.14731,
+                        lng: 120.66102,
+                        info: "雲朵咖啡",
+                        hours: {
+                            mon:"10:00-21:00",
+                            tue:"10:00-21:00",
+                            wed:"10:00-21:00",
+                            thu:"10:00-21:00",
+                            fri:"10:00-21:00",
+                            sat:"10:00-21:00",
+                            sun:"10:00-21:00"
+                        },
+                        url: "https://www.instagram.com/celaffee/",
+                    },
+                    
+                    {
+                        name:"有己 YOJI COFFEE",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.16189,
+                        lng: 120.68359,
+                        info: "台式復古咖啡廳",
+                        hours: {
+                            mon:"休息中",
+                            tue:"13:00-23:00",
+                            wed:"13:00-23:00",
+                            thu:"13:00-23:00",
+                            fri:"13:00-23:00",
+                            sat:"12:00-00:00",
+                            sun:"12:00-20:00"
+                        },
+                        url: "https://www.instagram.com/yojicoffeeee/",
+                    },
+
+                    {
+                        name:"Coffury Studio No.71",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:true, 
+                        lat: 24.16465,
+                        lng: 120.66971,
+                        info: "歐式風格咖啡廳",
+                        hours: {
+                            mon:"15:30-23:30",
+                            tue:"15:30-23:30",
+                            wed:"15:30-23:30",
+                            thu:"15:30-23:30",
+                            fri:"15:30-23:30",
+                            sat:"15:30-23:30",
+                            sun:"15:30-23:30"
+                        },
+                        url: "https://www.instagram.com/coffurystudio71/",
+                    },
+
+                     {
+                        name:"SUMUGAGA COFFEE ROASTERS",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.13576,
+                        lng: 120.67070,
+                        info: "自選咖啡豆、濾杯",
+                        hours: {
+                            mon:"10:00-19:00",
+                            tue:"休息中",
+                            wed:"休息中",
+                            thu:"10:00-19:00",
+                            fri:"10:00-19:00",
+                            sat:"10:00-19:00",
+                            sun:"10:00-19:00"
+                        },
+                        url: "https://www.instagram.com/sumugaga_coffee/",
+                    },
+
+                     {
+                        name:"Tomorrow Coffee Roasters",
+                        wifi:false,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.15372,
+                        lng: 120.62819,
+                        info: "世界百大咖啡廳",
+                        hours: {
+                            mon:"休息中",
+                            tue:"休息中",
+                            wed:"10:00-17:00",
+                            thu:"10:00-17:00",
+                            fri:"10:00-17:00",
+                            sat:"10:00-17:00",
+                            sun:"10:00-17:00"
+                        },
+                        url: "https://www.instagram.com/tomorrow_coffee?igsh=",
+                    },
+
+                     {
+                        name:"桴汌珈琲",
+                        wifi:false,
+                        socket:false,
+                        limitedTime:true, 
+                        lat: 24.15737,
+                        lng: 120.63080,
+                        info: "設有戶外庭院座位",
+                        hours: {
+                            mon:"11:00-18:00",
+                            tue:"11:00-18:00",
+                            wed:"11:00-18:00",
+                            thu:"11:00-18:00",
+                            fri:"11:00-18:00",
+                            sat:"11:00-18:00",
+                            sun:"11:00-18:00"
+                        },
+                        url: "https://www.instagram.com/fuchuan.coffee/",
+                    },
+
+                      {
+                        name:"Bagel Expresso 貝果咖啡_朝富店",
+                        wifi:false,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.16242,
+                        lng: 120.63493,
+                        info: "無廁所 推薦外帶",
+                        hours: {
+                            mon:"7:30-17:00",
+                            tue:"7:30-17:00",
+                            wed:"7:30-17:00",
+                            thu:"7:30-17:00",
+                            fri:"7:30-17:00",
+                            sat:"7:30-16:00",
+                            sun:"7:30-16:00"
+                        },
+                        url: "https://www.bagel-expresso.com/",
+                    },
+
+                    
+                      {
+                        name:"Caffeine Pit 咖啡因子",
+                        wifi:true,
+                        socket:false,
+                        limitedTime:false, 
+                        lat: 24.14122,
+                        lng: 120.65488,
+                        info: "3隻店貓",
+                        hours: {
+                            mon:"10:00-20:00",
+                            tue:"10:00-20:00",
+                            wed:"休息中",
+                            thu:"10:00-20:00",
+                            fri:"10:00-23:30",
+                            sat:"10:00-23:30",
+                            sun:"10:00-22:00"
+                        },
+                        url: "https://www.facebook.com/pages/Caffeine-Pit/425248167646955?sk=",
+                    },
+
+                
+                ];
+
+                const filters = {
+                    open: false,
+                    wifi: false,
+                    socket: false,
+                    limitedTime: false
+                };
+
+                let markers = [];
+
+                function renderCafes(cafeList){
+                    markers.forEach(marker =>{
+                        map.removeLayer(marker);
+                    });
+
+                    markers = [];
+
+                    cafeList.forEach(cafe => {
+
+                        const marker = 
+                        L.marker([cafe.lat, cafe.lng])
+                        .addTo(map)
+                        .bindPopup(`
+
+                        <h3>${cafe.name}</h3>
+                        <p>${cafe.info}</p> 
+                        <p>營業時間 <br> 
+                            星期一: ${cafe.hours.mon} <br>
+                            星期二: ${cafe.hours.tue} <br>
+                            星期三: ${cafe.hours.wed} <br>
+                            星期四: ${cafe.hours.thu} <br>
+                            星期五: ${cafe.hours.fri} <br>
+                            星期六: ${cafe.hours.sat} <br>
+                            星期日: ${cafe.hours.sun} <br>
+                            </p>
+                        <a href="${cafe.url}" target="_blank">
+                            店家連結
+                        </a>
+
+                        `);
+
+                        markers.push(marker);
+                    });
+                }
+
+                renderCafes(cafes);
+
+                function toggleFilter(type){
+                    filters[type] = !filters[type];
+
+                    const button = 
+                    document.getElementById(type + "Btn");
+
+                    button.classList.toggle("active");
+
+                    applyFilters();
+                };
+
+                function applyFilters(){
+
+                    const now = new Date();
+
+                    const days = [
+                        "sun",
+                        "mon",
+                        "tue",
+                        "wed",
+                        "thu",
+                        "fri",
+                        "sat"
+                    ];
+
+                    const today = days [now.getDay()];
+                    const currentTime =now.getHours() * 60 + now.getMinutes();
+
+                    const result = cafes.filter(cafe => {
+
+                    if(filters.open){
+                    const todayHours = cafe.hours[today];
+
+                    if (!todayHours.includes("-")){
+                        return false;
+                    }
+
+                    const parts = todayHours.split("-");
+                    const openTime = parts[0];
+                    const closeTime = parts[1];
+
+                    const openParts = openTime.split(":");
+                    const closeParts = closeTime.split(":");
+
+                    const openMinutes = parseInt(openParts[0]) * 60 + 
+                                        parseInt(openParts[1]);
+
+                    const closeMinutes = parseInt(closeParts[0]) * 60 + 
+                                        parseInt(closeParts[1]); 
+                                    
+                    let isOpen;
+                      
+                    if(openMinutes < closeMinutes){ 
+                        isOpen = 
+                              currentTime >= openMinutes &&
+                              currentTime <= closeMinutes;                    
+
+                    }
+                    else{
+                        isOpen = 
+                              currentTime >= openMinutes ||
+                              currentTime <= closeMinutes;                    
+
+                    }
+                    
+                    if(!isOpen){
+
+                        return false;
+                    }
+                    
+                    }
+
+                    if(filters.wifi && !cafe.wifi){
+
+                        return false;
+                    }
+
+                    if(filters.socket && !cafe.socket){
+
+                        return false;
+                    }
+
+                    if(filters.limitedTime && cafe.limitedTime){
+
+                        return false;
+                    }
+
+                    return true;
+
+                });
+
+                    renderCafes(result);
+                } 
+            
+           
+                </script>
+
+                
+
+
+            </body>
+            </html>
+
+    
